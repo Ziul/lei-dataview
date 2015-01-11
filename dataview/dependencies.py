@@ -23,7 +23,7 @@ class Packages(object):
         self.__dict__[key] = item
 
 
-def main():
+def check():
 
     dependencies = Packages()
 
@@ -69,5 +69,5 @@ def main():
 
 
 if __name__ == '__main__':
-    if main() is True:
+    if check() is True:
         print("No problens found")
