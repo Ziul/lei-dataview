@@ -4,6 +4,7 @@
 import matplotlib.pyplot as plt
 from threading import Thread
 from data import DataRead
+import signal
 
 
 class Plotter(Thread):
@@ -26,3 +27,25 @@ class Plotter(Thread):
     def run(self):
         while self.alive:
             self.read()
+
+
+def signal_handler(signal, frame):
+    import sys
+    sys.stderr.write('\nCtrl+C pressionado!\n\n')
+    p.stop()
+
+
+def f():
+    print('oi')
+
+
+def main():
+    signal.signal(signal.SIGINT, signal_handler)
+    p.start()
+    p.join(10)
+
+
+if __name__ == '__main__':
+    p = Plotter(f)
+    p.setDaemon(True)
+    main()
