@@ -4,6 +4,7 @@
 import matplotlib.pyplot as plt
 from threading import Thread
 from data import DataRead
+from time import sleep
 import signal
 import random
 import sys
@@ -24,10 +25,20 @@ class Plotter(Thread):
     def start(self):
         self.alive = True
         signal.signal(signal.SIGINT, self.stop)
-        super(Plotter, self).start()
+        # super(Plotter, self).start()
+        self.run()
 
-    def stop(self):
+    def join(self, time=0):
+        if(time != 0):
+            super(Plotter, self).join(time)
+        else:
+            while self.alive:
+                sleep(0.1)
+        self.stop()
+
+    def stop(self, signal=0, frame=0):
         self.alive = False
+        sleep(0.5)
 
     def readline(self):
         obj = self.read()
@@ -50,8 +61,7 @@ class Plotter(Thread):
         sys.stderr.write("Reading first data\n")
         msg = self.readline()
         msg = self.readline()
-        if (len(msg)) < N_ADC:
-            sys.stderr.write("Wating more sensors\n")
+        if (len(msg)) != N_ADC:
             N_ADC = len(msg)
         self.ADC = {"label": [], 'values': [], 'axis': range(N_ADC)}
         for i in range(N_ADC):
@@ -82,7 +92,8 @@ class Plotter(Thread):
                 sys.stderr.write("\rÍndice " + str(i) + " inexistente\n")
                 pass
             except TypeError:
-                print "\r No new value [%s]" % str(msg),
+                sys.stderr.write("\rNo new value [%s]" % str(msg))
+                sleep(0.5)
                 # self.stop()  # comment to let it roll
             plt.draw()
 
@@ -109,7 +120,6 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     p.start()
     p.join()
-
 
 if __name__ == '__main__':
     p = Plotter(f)
