@@ -13,11 +13,12 @@ class Plotter(Thread):
 
     """docstring for Plotter"""
     alive = False
+    time = []
     MAX = 50
 
     def __init__(self, readermethod):
         super(Plotter, self).__init__()
-        self.readline = readermethod
+        self.read = readermethod
         self.name = 'Plotter'
 
     def start(self):
@@ -27,6 +28,17 @@ class Plotter(Thread):
 
     def stop(self):
         self.alive = False
+
+    def readline(self):
+        obj = self.read()
+        try:
+            # self.time.append(obj.time)
+            # if len(self.time) > self.MAX:
+            #     self.time = self.time[1:]
+            self.time = obj.time
+            return obj.data
+        except Exception:
+            pass
 
     def run(self):
         N_ADC = 10
@@ -41,24 +53,27 @@ class Plotter(Thread):
         if (len(msg)) < N_ADC:
             sys.stderr.write("Wating more sensors\n")
             N_ADC = len(msg)
-        ADC = {"label": [], 'values': [], 'axis': range(N_ADC)}
+        self.ADC = {"label": [], 'values': [], 'axis': range(N_ADC)}
         for i in range(N_ADC):
-            ADC['label'].append("Sensor_" + str(i))
-            ADC['values'].append([]
-                                 )
-            ADC['axis'][i], = (axis.plot(ADC['values'][i]))
-        fig.legend(ADC['axis'], ADC['label'])
+            self.ADC['label'].append("Sensor " + str(i + 1))
+            self.ADC['values'].append([])
+            self.ADC['axis'][i], = (
+                axis.plot(self.ADC['values'][i]))
+
+        fig.legend(self.ADC['axis'], self.ADC['label'])
         while self.alive:
             try:
                 msg = self.readline()
                 for i in range(N_ADC):
-                    ADC['values'][i].append(float(msg[i]))
-                    if(len(ADC['values'][i]) > self.MAX):
-                        ADC['values'][i] = ADC['values'][i][1:]
-                    ADC['axis'][i].set_ydata(ADC['values'][i])
-                    ADC['axis'][i].set_xdata(range(len(ADC['values'][i])))
-                    axis.relim()
-                    axis.autoscale_view(True, True, True)
+                    self.ADC['values'][i].append(float(msg[i]))
+                    if(len(self.ADC['values'][i]) > self.MAX):
+                        self.ADC['values'][i] = self.ADC['values'][i][1:]
+                    self.ADC['axis'][i].set_ydata(self.ADC['values'][i])
+                    self.ADC['axis'][i].set_xdata(
+                        range(len(self.ADC['values'][i])))
+                axis.relim()
+                axis.autoscale_view(True, True, True)
+                plt.xlabel(self.time)
                 # print msg
             except ValueError:
                 sys.stderr.write(
@@ -67,8 +82,8 @@ class Plotter(Thread):
                 sys.stderr.write("\rÍndice " + str(i) + " inexistente\n")
                 pass
             except TypeError:
-                print "\r No new value %s" % str(msg),
-                self.stop()
+                print "\r No new value [%s]" % str(msg),
+                # self.stop()  # comment to let it roll
             plt.draw()
 
 
@@ -87,7 +102,7 @@ def f(arg=0):
             data += line
         else:
             ret = datastore.read(data)
-            return ret.data
+            return ret
 
 
 def main():
