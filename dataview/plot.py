@@ -100,12 +100,11 @@ class Plotter(Thread):
 
 def signal_handler(signal, frame):
 
-    sys.stderr.write('\nCtrl+C pressionado!\n\n')
+    sys.stderr.write('\nCtrl+C  pressed!\n\n')
     p.stop()
 
 
 def f(arg=0):
-    # print('oi')
     data = ''
     datastore = DataRead(data)
     for line in sys.stdin:

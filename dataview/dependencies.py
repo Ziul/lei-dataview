@@ -56,6 +56,10 @@ def check():
     except ImportError as e:
         dependencies['python-serial'] = False
     try:
+        from mock import MagicMock
+    except ImportError as e:
+        dependencies['mock'] = False
+    try:
         import sys          # get the params
     except ImportError as e:
         dependencies[str(e).split(' ')[3]] = False
