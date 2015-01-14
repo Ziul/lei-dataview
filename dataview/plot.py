@@ -61,8 +61,12 @@ class Plotter(Thread):
         sys.stderr.write("Reading first data\n")
         msg = self.readline()
         msg = self.readline()
-        if (len(msg)) != N_ADC:
-            N_ADC = len(msg)
+        try:
+            if (len(msg)) != N_ADC:
+                N_ADC = len(msg)
+        except TypeError:
+            print msg
+            raise
         self.ADC = {"label": [], 'values': [], 'axis': range(N_ADC)}
         for i in range(N_ADC):
             self.ADC['label'].append("Sensor " + str(i + 1))

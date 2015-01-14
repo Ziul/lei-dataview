@@ -54,7 +54,7 @@ class Arduino(Miniterm):
             self.serial = MagicMock()
             self.serial.readline = util.randomstring
             # raise Exception
-        self.readline = self.serial.readline
+        self.readline = self.serial.readlines(4)
         self.port = tty
         self.enable()
 

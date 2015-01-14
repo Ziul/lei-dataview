@@ -25,6 +25,18 @@ def read_data():
             return ret
 
 
+def read_data_uc():
+    data = ''
+    datastore = DataRead(data)
+    while True:
+        line = uc.serial.readline()
+        if line != '\n':
+            data += line
+        else:
+            ret = datastore.read(data)
+            return ret
+
+
 def signal_handler(signal, frame):
 
     sys.stderr.write('\nCtrl+C  pressed!\n\n')
@@ -35,8 +47,8 @@ def signal_handler(signal, frame):
 print 'Available ports:'
 PORTS_AVAILABLE = util.available_ports()
 try:
-    for i in PORTS_AVAILABLE:
-        print '>>> %s' % i
+    for k, i in zip(PORTS_AVAILABLE, range(len(PORTS_AVAILABLE))):
+        print '%d >>> %s' % (i, k)
     print '---'
 except TypeError, error:
     print "None device connected"
@@ -50,9 +62,14 @@ elif len(PORTS_AVAILABLE) == 0:
     from sys import stdin
     uc = microcontroller(None)
     uc.readline = stdin
-    # exit()
+    p = Plotter(read_data)
+elif len(PORTS_AVAILABLE) > 1:
+    choosed = input("Choose one:")
+    print "\nChoosed: %s" % choosed
+    uc = microcontroller(PORTS_AVAILABLE[int(choosed)])
+    p = Plotter(read_data_uc)
+    print uc.serial.readline()
 
-p = Plotter(read_data)
 p.setDaemon(True)
 signal(SIGINT, signal_handler)
 p.start()
