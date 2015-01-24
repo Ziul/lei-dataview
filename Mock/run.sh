@@ -20,9 +20,9 @@ echo""
 echo "symbolic links created, see for yourself:"
 ls /dev/ttyUSB*
 
-for i in `seq 1 10`;
-do
-        cat message.txt > /dev/ttyUSB$1
-done 
+# for i in `seq 1 10`;
+# do
+#         cat message.txt > /dev/ttyUSB$1
+# done 
 
 # ./unlinking.sh
