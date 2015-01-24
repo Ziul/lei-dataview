@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from scanf import sscanf
+from scanf import sscanf, IncompleteCaptureError
 
 
 class DataRead(object):
@@ -9,6 +9,7 @@ class DataRead(object):
     """docstring for DataRead"""
     time = ''
     data = []
+    formatter = "%s\n%d %d %d\n%d %d %d\n%d %d %d\n"
 
     def __init__(self, arg=''):
         super(DataRead, self).__init__()
@@ -26,8 +27,16 @@ class DataRead(object):
         return data
 
     def read(self, loaded):
-        self.time = sscanf(loaded, "%s\n%d %d %d\n%d %d %d\n%d %d %d\n")[0]
-        self.data = sscanf(loaded, "%s\n%d %d %d\n%d %d %d\n%d %d %d\n")[1:]
+        try:
+            self.time = sscanf(loaded, self.formatter)[0]
+            self.data = list(sscanf(loaded, self.formatter)[1:])
+            # self.time = loaded.split('\n')[0]
+            # self.data = ' '.join(loaded.split('\n')[1:]).split(' ')
+            self.data.remove('')
+        except IncompleteCaptureError as e:
+            print str(e)
+        except ValueError:
+            pass
         return self
 
     def __str__(self):

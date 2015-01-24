@@ -65,7 +65,7 @@ elif len(PORTS_AVAILABLE) == 0:
     p = Plotter(read_data)
 elif len(PORTS_AVAILABLE) > 1:
     choosed = input("Choose one:")
-    print "\nChoosed: %s" % choosed
+    print "\nChoosed: %s" % PORTS_AVAILABLE[int(choosed)]
     uc = microcontroller(PORTS_AVAILABLE[int(choosed)])
     p = Plotter(read_data_uc)
     print uc.serial.readline()
