@@ -10,6 +10,7 @@ from time import sleep
 import signal
 import random
 import sys
+import select
 
 
 class Plotter(Thread):
@@ -29,7 +30,7 @@ class Plotter(Thread):
         # mw = QtGui.QMainWindow()
         # mw.resize(800, 800)
         self.win = pg.GraphicsWindow()
-        self.win.setWindowTitle('Scrolling Plots')
+        self.win.setWindowTitle('Dataview Plots')
 
     def start(self):
         self.alive = True
@@ -38,11 +39,12 @@ class Plotter(Thread):
         self.run()
 
     def join(self, time=0):
+        print 'oi'
         if(time != 0):
             super(Plotter, self).join(time)
         else:
             while self.alive:
-                sleep(0.1)
+                pass
         self.stop()
 
     def stop(self, signal=0, frame=0):
@@ -52,7 +54,7 @@ class Plotter(Thread):
     def newPort(self, port):
         self.devices['ports'].append(port)
         p = self.win.addPlot(title="Device %s" % len(self.devices['ports']))
-        p.addLegend()
+        # p.addLegend()
         self.devices['plot'].append(p)
 
     def readline(self, port):
@@ -75,16 +77,19 @@ class Plotter(Thread):
 
         for port, plot in zip(self.devices['ports'], self.devices['plot']):
             msg = self.readline(port)
-            for data, i, udata in zip(self.devices['data'],
-                                      range(self.N_SENSOR),
-                                      msg):
+            if msg != '':
+                plot.clear()
+                plot.setLabel('bottom', text=self.time)
+                for data, i, udata in zip(self.devices['data'],
+                                          range(self.N_SENSOR),
+                                          msg):
 
-                data.append(udata)
-                data
-                if len(data) > self.MAX:
-                    data = data[1:]
+                    data.append(udata)
+                    if len(data) > self.MAX:
+                        del data[0]
 
-                plot.plot(data, pen=(i, self.N_SENSOR), name = "Sensor %d" % i)
+                    p = plot.plot(
+                        data, pen=(i, self.N_SENSOR), name = "Sensor %d" % i)
 
     def run(self):
 
@@ -125,19 +130,8 @@ def signal_handler(signal, frame):
     p.stop()
 
 
-def f(arg=0):
-    data = ''
-    datastore = DataRead(data)
-    for line in sys.stdin:
-        if line != '\n':
-            data += line
-        else:
-            ret = datastore.read(data)
-            return ret
-
-
 def main():
-    signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGINT, signal_handler)
     port = MagicMock()
     port.readline = sys.stdin.readline
     p.newPort(port)
