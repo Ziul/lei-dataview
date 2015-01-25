@@ -38,7 +38,7 @@ class Arduino(Miniterm):
     alive = False
     modules = {}
 
-    def __init__(self, tty, baud=9600, parity="O", timeout=5):
+    def __init__(self, tty, baud=9600, parity="O", timeout=0):
         if tty is not None:
             try:
                 super(Arduino, self).__init__(tty, baud, 'N',
@@ -47,7 +47,8 @@ class Arduino(Miniterm):
                 print util.ROOT_MESSAGE
                 print e
                 exit(-1)
-            self.serial.setTimeout(1)
+            self.serial.setTimeout(0)
+            self.serial.nonblocking()
         else:
             """FIXME: remove the code bellow in 
             production environment"""
