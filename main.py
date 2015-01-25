@@ -61,13 +61,15 @@ elif len(PORTS_AVAILABLE) == 0:
     print "None device connected"
     from sys import stdin
     uc = microcontroller(None)
-    uc.readline = stdin
-    p = Plotter(read_data)
+    uc.readline = stdin.readline
+    p = Plotter()
+    p.newPort(uc)
 elif len(PORTS_AVAILABLE) > 1:
     choosed = input("Choose one:")
     print "\nChoosed: %s" % PORTS_AVAILABLE[int(choosed)]
     uc = microcontroller(PORTS_AVAILABLE[int(choosed)])
-    p = Plotter(read_data_uc)
+    p = Plotter()
+    p.newPort(uc.serial)
     print uc.serial.readline()
 
 p.setDaemon(True)
