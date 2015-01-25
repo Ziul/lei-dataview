@@ -3,6 +3,7 @@
 
 from mock import MagicMock
 from pyqtgraph.Qt import QtGui, QtCore
+from serial.serialutil import SerialException
 import pyqtgraph as pg
 from threading import Thread
 from data import DataRead
@@ -61,7 +62,11 @@ class Plotter(Thread):
         data = ''
         datastore = DataRead(data)
         while True:
-            line = port.readline()
+            try:
+                line = port.readline()
+            except SerialException:
+                Exception(" Device desconected")
+                exit()
             if line != '\n':
                 data += line
             else:
@@ -113,6 +118,7 @@ class Plotter(Thread):
 
         for i in range(self.N_SENSOR):
             self.devices['data'].append([0])
+
         timer = QtCore.QTimer()
         timer.timeout.connect(self.update)
         timer.start(0)

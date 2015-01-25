@@ -12,6 +12,7 @@ from dataview.plot import Plotter
 from dataview.device.arduino import Arduino as microcontroller
 from dataview.data import DataRead
 from signal import signal, SIGINT
+from pyqtgraph.Qt import QtGui, QtCore
 
 
 def read_data():
@@ -43,11 +44,19 @@ def signal_handler(signal, frame):
     p.stop()
 
 
+def port_checker():
+    global N_PORTS
+    PORTS_AVAILABLE = util.available_ports()
+    if N_PORTS != len(PORTS_AVAILABLE):
+        util.choose_port(PORTS_AVAILABLE)
+        N_PORTS = len(PORTS_AVAILABLE)
+
 # list available ports
 print 'Available ports:'
 PORTS_AVAILABLE = util.available_ports()
+N_PORTS = len(PORTS_AVAILABLE)
 try:
-    for k, i in zip(PORTS_AVAILABLE, range(len(PORTS_AVAILABLE))):
+    for k, i in zip(PORTS_AVAILABLE, range(N_PORTS)):
         print '%d >>> %s' % (i, k)
     print '---'
 except TypeError, error:
@@ -55,22 +64,27 @@ except TypeError, error:
     exit()
 
 # choose a port
-if len(PORTS_AVAILABLE) == 1:
+if N_PORTS == 1:
     uc = microcontroller(PORTS_AVAILABLE[0])
-elif len(PORTS_AVAILABLE) == 0:
+elif N_PORTS == 0:
     print "None device connected"
     from sys import stdin
     uc = microcontroller(None)
     uc.readline = stdin.readline
+    uc.flushInput = port_checker
     p = Plotter()
     p.newPort(uc)
-elif len(PORTS_AVAILABLE) > 1:
+elif N_PORTS > 1:
     choosed = input("Choose one:")
     print "\nChoosed: %s" % PORTS_AVAILABLE[int(choosed)]
     uc = microcontroller(PORTS_AVAILABLE[int(choosed)])
     p = Plotter()
     p.newPort(uc.serial)
     print uc.serial.readline()
+
+timer = QtCore.QTimer()
+timer.timeout.connect(port_checker)
+timer.start(0)
 
 p.setDaemon(True)
 signal(SIGINT, signal_handler)

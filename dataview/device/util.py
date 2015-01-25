@@ -41,3 +41,19 @@ def available_ports():
         raise error
 
     return PORTS_AVAILABLE
+
+
+def choose_port(PORTS_AVAILABLE):
+    N_PORTS = len(PORTS_AVAILABLE)
+    try:
+        for k, i in zip(PORTS_AVAILABLE, range(N_PORTS)):
+            print '%d >>> %s' % (i, k)
+        print '---'
+    except TypeError, error:
+        print "None device connected"
+        return None
+
+    if N_PORTS > 1:
+        choosed = input("Choose one:")
+        print "\nChoosed: %s" % PORTS_AVAILABLE[int(choosed)]
+        return PORTS_AVAILABLE[int(choosed)]
