@@ -43,6 +43,8 @@ def check():
         import pyqtgraph
     except ImportError as e:
         dependencies['pyqtgraph'] = False
+    except Exception as e:
+        dependencies['python-qt4'] = False
     try:
         import signal       # signals as in C
     except ImportError as e:
