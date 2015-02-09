@@ -2,11 +2,6 @@
 # coding: utf-8
 
 try:
-    from smbus import SMBus
-except ImportError:
-    print "smbus not installed"
-
-try:
     from serial.tools.miniterm import Miniterm, CONVERT_CR, CONVERT_CRLF, CONVERT_LF, EXITCHARCTER, MENUCHARACTER
     from serial.tools.list_ports import comports
 except Exception as e:
@@ -50,10 +45,13 @@ class I2C_Sensor(object):
         self.mode = mode
 
         try:
+            from smbus import SMBus
             self.bus = SMBus(self.port)
         except IOError:
             self.bus = None
             self.live = False
+        except ImportError:
+            print "smbus not installed"
         except Exception as e:
             raise e
 
@@ -87,38 +85,38 @@ class I2C_Sensor(object):
 class Serial_Sensor(Miniterm):
 
     def __init__(
-        self,
-        port,
-        baudrate=9600,
-        parity='N',
-        rtscts=False,
-        xonxoff=False,
-        echo=False,
-        convert_outgoing=CONVERT_CRLF,
-        mode=0):
-                super(
-                    Serial_Sensor,
-                    self).__init__(port,
-                                   baudrate,
-                                   parity,
-                                   rtscts,
-                                   xonxoff,
-                                   echo=False,
-                                   convert_outgoing=CONVERT_CRLF,
-                                   repr_mode=mode)
+            self,
+            port,
+            baudrate=9600,
+            parity='N',
+            rtscts=False,
+            xonxoff=False,
+            echo=False,
+            convert_outgoing=CONVERT_CRLF,
+            mode=0):
+        super(
+            Serial_Sensor,
+            self).__init__(port,
+                           baudrate,
+                           parity,
+                           rtscts,
+                           xonxoff,
+                           echo=False,
+                           convert_outgoing=CONVERT_CRLF,
+                           repr_mode=mode)
 
     def enable(self):
         """ Method to enable the sensor """
-        self.alive = True
+        self.live = True
 
     def disable(self, signal=None, frame=None):
         """ Method to desable the sensor """
-        self.alive = False
+        self.live = False
         self.serial.close()
 
     def acquire(self):
         """ Method to acquire the values from sensor """
-        if self.alive:
+        if self.live:
             return self.serial.readline()
 
     def read(self):
