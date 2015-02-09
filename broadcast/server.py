@@ -167,7 +167,7 @@ class Server(Thread):
                     # recieved through server_socket
                     sockfd, addr = self.server_socket.accept()
                     self.clients_list.append(sockfd)
-                    self.ret = "Client (%s, %s) connected" % addr
+                    self.ret = "Client (%s: %s) connected" % addr
                     self.ret += " [%d clients]\n" % (
                         len(self.clients_list) - 1)
                     sys.stdout.write(self.ret)
