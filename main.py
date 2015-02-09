@@ -38,7 +38,7 @@ def build_logger(name):
     from os import path
 
     root = path.dirname(path.abspath(__file__))
-    handler = logging.FileHandler('%s/Logs/%s %s.log' % (root, day, name))
+    handler = logging.FileHandler('%s/Logs/%s.log' % (root, day))
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -63,8 +63,6 @@ def run_sensor(dict_sensor):
     sensor.enable()
 
     print "%s - ready" % name
-    # get some values
-    # for i in range(1000):
     while sensor.live:
         if sensor.live:
             # write on server
@@ -73,7 +71,8 @@ def run_sensor(dict_sensor):
                 sensor_stream.write(data + '\n')
 
                 # write on logger
-                logger.info(str(sensor))
+                logger.info(data)
+                # print data
         else:
             # write on server
             sensor_stream.write("Sensor %s not connected\n" % sensor.address)
