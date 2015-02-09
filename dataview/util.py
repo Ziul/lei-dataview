@@ -54,8 +54,12 @@ def choose_port(PORTS_AVAILABLE):
         return None
 
     if N_PORTS > 1:
-        choosed = raw_input("Choose one:")
-        print "\nChoosed: %s" % PORTS_AVAILABLE[int(choosed)]
+        choosed = input("Choose one:")
+        try:
+            print "\nChoosed: %s" % PORTS_AVAILABLE[int(choosed)]
+        except Exception, e:
+            exit()
+
         return PORTS_AVAILABLE[int(choosed)]
     elif N_PORTS == 1:
         print "\nChoosed: %s" % PORTS_AVAILABLE[0]
