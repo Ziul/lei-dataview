@@ -25,6 +25,7 @@ glove_server = Server()
 
 def signal_handler(signal=0, frame=0):
     global glove_server
+    import sys
     sys.stderr.write('\nCtrl+C  pressed!\n\n')
     glove_server.stop()
     sleep(2)
