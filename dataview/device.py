@@ -14,6 +14,7 @@ except Exception as e:
     print 'Install glob'
     raise e
 
+from data import DataRead
 
 ROOT_MESSAGE = """
   .-------------------------------.
@@ -104,6 +105,7 @@ class Serial_Sensor(Miniterm):
                            echo=False,
                            convert_outgoing=CONVERT_CRLF,
                            repr_mode=mode)
+        self.serial.timeout = 0
 
     def enable(self):
         """ Method to enable the sensor """
@@ -117,10 +119,21 @@ class Serial_Sensor(Miniterm):
     def acquire(self):
         """ Method to acquire the values from sensor """
         if self.live:
-            return self.serial.readline()
+            data = ''
+            line = ''
+            while (line != '\n'):
+                line = self.serial.readline()
+                data += line
+            # if len(data) > 1:
+            #     print data,
+            #     print '------'
+            return str(data)
 
     def read(self):
-        pass
+        return self.acquire()
+
+    def __str__(self):
+        return self.acquire()
 
 
 if __name__ == '__main__':
