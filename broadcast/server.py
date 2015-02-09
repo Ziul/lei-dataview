@@ -63,7 +63,7 @@ class Server(Thread):
             self.server_socket.listen(10)
             self.clients_list.append(self.server_socket)
             return (
-                "Server seted Up on %s (%s:%s)" % (
+                "Server seted Up on %s (%s:%s)\n" % (
                     socket.gethostname(),
                     self.ip,
                     self.port)
@@ -95,6 +95,9 @@ class Server(Thread):
 """ % ('(  ' + str(error) + ' )'.rjust(14))
 
             raise Exception(self.ret)
+
+    def __str__(self):
+        return "Server =>  %s:%s" % (self.ip, self.port)
 
     def broadcast(self, sock, message):
         """
@@ -142,7 +145,7 @@ class Server(Thread):
         self.live = True
         if self.broad:
             # sys.stdout.write("Socket ready\n")
-            self.ret = "Socket ready\n"
+            # self.ret = "Socket ready\n"
             sys.stdout.write(self.ret)
         else:
             sys.stdout.write(
