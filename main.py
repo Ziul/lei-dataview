@@ -86,9 +86,9 @@ def main():
 
     print "%s" % (dt.now().strftime("%A, %d. %B %Y %I:%M%p"))
     signal.signal(signal.SIGINT, signal_handler)
-    sensors_address = {'capa': check_port()}
+    sensors_address = {'BioArt & Health': check_port()}
     sensors = {}
-    if sensors_address['capa'] == None:
+    if sensors_address['BioArt & Health'] is None:
         print "None port connected"
         exit()
 
