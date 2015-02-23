@@ -7,7 +7,6 @@ if dependencies.check() is False:
     exit()
 
 
-from multiprocessing import Pool
 from dataview.device import Serial_Sensor as Sensor
 from dataview.util import check_port
 from broadcast.server import Server
@@ -81,25 +80,33 @@ def run_sensor(dict_sensor):
 
 def main():
     """ Main method """
-    print "%s" % (dt.now().strftime("%A, %d. %B %Y %I:%M%p"))
-    # exit()
-    signal.signal(signal.SIGINT, signal_handler)
     global glove_server
     from os import path, makedirs
     if not path.exists('Logs'):
         makedirs('Logs')
-    glove_server.start()
 
-    _pool = Pool(processes=_MAX_PEERS)
+    print "%s" % (dt.now().strftime("%A, %d. %B %Y %I:%M%p"))
+    signal.signal(signal.SIGINT, signal_handler)
     sensors_address = {'capa': check_port()}
     sensors = {}
+    if sensors_address['capa'] == None:
+        print "None port connected"
+        exit()
 
+    glove_server.start()
     for i in sensors_address:
-        sensors[i] = Sensor(sensors_address[i], baudrate=9600, parity='N')
+        try:
+            sensors[i] = Sensor(sensors_address[i], baudrate=9600, parity='N')
+        except Exception, e:
+            glove_server.stop()
+            sleep(1)
+            print e
+            exit()
 
     # result = _pool.map(run_sensor, sensors.items())
     result = threading.Thread(
         target=run_sensor, name='Sensor', args=(sensors.items()))
+    result.daemon=False
     result.start()
 
     # for i in result:
