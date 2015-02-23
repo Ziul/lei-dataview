@@ -28,10 +28,6 @@ def check():
     dependencies = Packages()
 
     try:
-        import pylab
-    except ImportError as e:
-        dependencies['python-matplotlib'] = False
-    try:
         import time
     except ImportError as e:
         dependencies[str(e).split(' ')[3]] = False
@@ -44,9 +40,11 @@ def check():
     except ImportError as e:
         dependencies[str(e).split(' ')[3]] = False
     try:
-        import matplotlib.pyplot as plt
+        import pyqtgraph
     except ImportError as e:
-        dependencies['python-matplotlib'] = False
+        dependencies['pyqtgraph'] = False
+    except Exception as e:
+        dependencies['python-qt4'] = False
     try:
         import signal       # signals as in C
     except ImportError as e:

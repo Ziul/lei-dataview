@@ -1,26 +1,37 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-import matplotlib.pyplot as plt
+from mock import MagicMock
+from pyqtgraph.Qt import QtGui, QtCore
+from serial.serialutil import SerialException
+import pyqtgraph as pg
 from threading import Thread
 from data import DataRead
 from time import sleep
 import signal
 import random
 import sys
+import select
 
 
 class Plotter(Thread):
 
     """docstring for Plotter"""
     alive = False
-    time = []
+    N_SENSOR = 0
     MAX = 50
+    devices = {'ports': [],
+               'data': [],
+               'plot': []}
 
-    def __init__(self, readermethod):
+    def __init__(self):
         super(Plotter, self).__init__()
-        self.read = readermethod
         self.name = 'Plotter'
+        self.app = QtGui.QApplication([])
+        # mw = QtGui.QMainWindow()
+        # mw.resize(800, 800)
+        self.win = pg.GraphicsWindow()
+        self.win.setWindowTitle('Dataview Plots')
 
     def start(self):
         self.alive = True
@@ -29,77 +40,94 @@ class Plotter(Thread):
         self.run()
 
     def join(self, time=0):
+        print 'oi'
         if(time != 0):
             super(Plotter, self).join(time)
         else:
             while self.alive:
-                sleep(0.1)
+                pass
         self.stop()
 
     def stop(self, signal=0, frame=0):
         self.alive = False
         sleep(0.5)
 
-    def readline(self):
-        obj = self.read()
+    def newPort(self, port):
+        self.devices['ports'].append(port)
+        p = self.win.addPlot(title="Device %s" % len(self.devices['ports']))
+        # p.addLegend()
+        self.devices['plot'].append(p)
+
+    def readline(self, port):
+        data = ''
+        datastore = DataRead(data)
+        while True:
+            try:
+                line = port.readline()
+            except SerialException:
+                Exception(" Device desconected")
+                exit()
+            if line != '\n':
+                data += line
+            else:
+                obj = datastore.read(data)
+                break
         try:
-            # self.time.append(obj.time)
-            # if len(self.time) > self.MAX:
-            #     self.time = self.time[1:]
             self.time = obj.time
             return obj.data
         except Exception:
             pass
 
-    def run(self):
-        N_ADC = 10
-        fig = plt.figure(figsize=(16, 10))
-        axis = fig.add_subplot(111)
-        axis.set_xlim([0, self.MAX + 5])
-        plt.ion()
-        plt.show()
-        sys.stderr.write("Reading first data\n")
-        msg = self.readline()
-        msg = self.readline()
-        try:
-            if (len(msg)) != N_ADC:
-                N_ADC = len(msg)
-        except TypeError:
-            print msg
-            raise
-        self.ADC = {"label": [], 'values': [], 'axis': range(N_ADC)}
-        for i in range(N_ADC):
-            self.ADC['label'].append("Sensor " + str(i + 1))
-            self.ADC['values'].append([])
-            self.ADC['axis'][i], = (
-                axis.plot(self.ADC['values'][i]))
+    def update(self):
 
-        fig.legend(self.ADC['axis'], self.ADC['label'])
+        for port, plot in zip(self.devices['ports'], self.devices['plot']):
+            msg = self.readline(port)
+            if msg != '':
+                plot.clear()
+                plot.setLabel('bottom', text=self.time)
+                for data, i, udata in zip(self.devices['data'],
+                                          range(self.N_SENSOR),
+                                          msg):
+
+                    data.append(udata)
+                    if len(data) > self.MAX:
+                        del data[0]
+
+                    p = plot.plot(
+                        data, pen=(i, self.N_SENSOR), name = "Sensor %d" % i)
+
+    def run(self):
+
+        # If none port connected
+        if len(self.devices['ports']) == 0:
+            self.stop()
+            raise Exception(" None port included")
+
+        # Flush input to avoid mess
+        for port in self.devices['ports']:
+            port.flushInput()
+
+        sys.stderr.write("Reading first data\n")
+        msg = self.readline(self.devices['ports'][0])
+
+        try:
+            self.N_SENSOR = len(msg)
+        except TypeError:
+            sys.stderr.write(msg + '\n')
+            raise
+
+        for i in range(self.N_SENSOR):
+            self.devices['data'].append([0])
+
+        timer = QtCore.QTimer()
+        timer.timeout.connect(self.update)
+        timer.start(0)
+
+        if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+            QtGui.QApplication.instance().exec_()
+
         while self.alive:
-            try:
-                msg = self.readline()
-                for i in range(N_ADC):
-                    self.ADC['values'][i].append(float(msg[i]))
-                    if(len(self.ADC['values'][i]) > self.MAX):
-                        self.ADC['values'][i] = self.ADC['values'][i][1:]
-                    self.ADC['axis'][i].set_ydata(self.ADC['values'][i])
-                    self.ADC['axis'][i].set_xdata(
-                        range(len(self.ADC['values'][i])))
-                axis.relim()
-                axis.autoscale_view(True, True, True)
-                plt.xlabel(self.time)
-                # print msg
-            except ValueError:
-                sys.stderr.write(
-                    "Dado mal formatado " + str(msg) + "\n")
-            except IndexError:
-                sys.stderr.write("\rÍndice " + str(i) + " inexistente\n")
-                pass
-            except TypeError:
-                sys.stderr.write("\rNo new value [%s]" % str(msg))
-                sleep(0.5)
-                # self.stop()  # comment to let it roll
-            plt.draw()
+            pass
 
 
 def signal_handler(signal, frame):
@@ -108,23 +136,15 @@ def signal_handler(signal, frame):
     p.stop()
 
 
-def f(arg=0):
-    data = ''
-    datastore = DataRead(data)
-    for line in sys.stdin:
-        if line != '\n':
-            data += line
-        else:
-            ret = datastore.read(data)
-            return ret
-
-
 def main():
-    signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGINT, signal_handler)
+    port = MagicMock()
+    port.readline = sys.stdin.readline
+    p.newPort(port)
     p.start()
     p.join()
 
 if __name__ == '__main__':
-    p = Plotter(f)
+    p = Plotter()
     p.setDaemon(True)
     main()
