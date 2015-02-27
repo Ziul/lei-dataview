@@ -71,7 +71,7 @@ def run_sensor(dict_sensor):
 
                 # write on logger
                 logger.info(data)
-                # print data
+                print data
         else:
             # write on server
             sensor_stream.write("Sensor %s not connected\n" % sensor.address)
