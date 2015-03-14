@@ -33,7 +33,7 @@ To create two virtual ports, run the script  [./Mock/run.sh](https://github.com/
 
     ./Mock/run.sh 21 22
 
-This will create the ports   **/dev/ttyUSB21** and  ** /dev/ttyUSB22** who are linked
+This will create the ports   **/dev/ttyUSB21** and  **/dev/ttyUSB22** who are linked
 to each other by echo. Now if you you want to send some message to port **/dev/ttyUSB21**
 you just need to do:
 
@@ -45,7 +45,7 @@ To close the ports, just use<sup>**1**</sup>:
 
     ./Mock/unlinking.sh 21 22
 
-<sub>**1:** Care! Using it will kill all **socat** runing daemon. </sub>
+<sub>**1:** Care! Using it will kill all daemon **socat** runing. </sub>
 
 
 ### Running application
