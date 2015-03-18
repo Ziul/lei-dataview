@@ -19,7 +19,11 @@ import threading
 
 # try to keep it equals or more than how many sensors we have
 _MAX_PEERS = 2
-glove_server = Server()
+
+try:
+    glove_server = Server()
+except Exception, e:
+    glove_server = object()
 
 
 def signal_handler(signal=0, frame=0):
@@ -34,7 +38,7 @@ def signal_handler(signal=0, frame=0):
 def build_logger(name):
     """ Method to build the logger's handler """
     # name = dt.strftime("%A, %d. %B %Y %I:%M%p")
-    day = dt.now().strftime("%A, %d. %B %Y - %H:%M")
+    day = dt.now().strftime("%A, %d. %B %Y - %H_%M")
     from os import path
 
     root = path.dirname(path.abspath(__file__))
@@ -92,7 +96,11 @@ def main():
         print "None port connected"
         exit()
 
-    glove_server.start()
+    try:
+        glove_server.start()
+    except Exception, e:
+        pass
+
     for i in sensors_address:
         try:
             sensors[i] = Sensor(sensors_address[i], baudrate=9600, parity='N')
@@ -115,9 +123,14 @@ def main():
     # make sure all clients stoped
     sleep(0.5)
     # stop server
-    # glove_server.stop()
+
     # wait it stop
-    glove_server.join()
+    try:
+        glove_server.stop()
+        glove_server.join()
+    except Exception, e:
+        pass
+
 
 if __name__ == '__main__':
     main()
