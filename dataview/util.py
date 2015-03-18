@@ -67,4 +67,8 @@ def choose_port(PORTS_AVAILABLE):
 
 
 def check_port():
-    return choose_port(available_ports())
+    ports = available_ports()
+    if len(ports) < 1:
+        return raw_input("Enter the name of a valid port: ")
+    else:
+        return choose_port(ports)
