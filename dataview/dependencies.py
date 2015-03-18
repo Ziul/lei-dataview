@@ -39,12 +39,12 @@ def check():
         import random
     except ImportError as e:
         dependencies[str(e).split(' ')[3]] = False
-    try:
-        import pyqtgraph
-    except ImportError as e:
-        dependencies['pyqtgraph'] = False
-    except Exception as e:
-        dependencies['python-qt4'] = False
+    # try:
+    #     import pyqtgraph
+    # except ImportError as e:
+    #     dependencies['pyqtgraph'] = False
+    # except Exception as e:
+    #     dependencies['python-qt4'] = False
     try:
         import signal       # signals as in C
     except ImportError as e:
